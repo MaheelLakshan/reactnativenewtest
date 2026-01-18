@@ -1,4 +1,5 @@
 PODS:
+  - Alamofire (5.10.2)
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
   - fast_float (8.0.0)
@@ -8,6 +9,14 @@ PODS:
   - hermes-engine (0.82.1):
     - hermes-engine/Pre-built (= 0.82.1)
   - hermes-engine/Pre-built (0.82.1)
+  - ObjectMapper (4.4.2)
+  - payhere-mobilesdk-reactnative (4.1.0):
+    - payHereSDK (= 3.1.1)
+    - React
+  - payHereSDK (3.1.1):
+    - Alamofire (~> 5.10.2)
+    - ObjectMapper
+    - SDWebImage
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -2438,6 +2447,9 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - SDWebImage (5.21.5):
+    - SDWebImage/Core (= 5.21.5)
+  - SDWebImage/Core (5.21.5)
   - SocketRocket (0.7.1)
   - Yoga (0.0.0)
 
@@ -2449,6 +2461,7 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - "payhere-mobilesdk-reactnative (from `../node_modules/@payhere/payhere-mobilesdk-reactnative`)"
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
@@ -2518,11 +2531,16 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
+  - SDWebImage
   - SocketRocket (~> 0.7.1)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
+    - Alamofire
+    - ObjectMapper
+    - payHereSDK
+    - SDWebImage
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -2541,6 +2559,8 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2025-09-01-RNv0.82.0-265ef62ff3eb7289d17e366664ac0da82303e101
+  payhere-mobilesdk-reactnative:
+    :path: "../node_modules/@payhere/payhere-mobilesdk-reactnative"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -2681,6 +2701,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
@@ -2688,6 +2709,9 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 273e30e7fb618279934b0b95ffab60ecedb7acf5
+  ObjectMapper: e6e4d91ff7f2861df7aecc536c92d8363f4c9677
+  payhere-mobilesdk-reactnative: 6c980080dc03bb823f0f0044696b1c88c46894f3
+  payHereSDK: b918a8b15cca0c0f58677b73df3b4b354925df6f
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: f17e2ebc07876ca9ab8eb6e4b0a4e4647497ae3a
   RCTRequired: e2c574c1b45231f7efb0834936bd609d75072b63
@@ -2756,9 +2780,10 @@ SPEC CHECKSUMS:
   ReactCommon: 804dc80944fa90b86800b43c871742ec005ca424
   RNDeviceInfo: 36d7f232bfe7c9b5c494cb7793230424ed32c388
   RNPermissions: 7108be11821a11d2456f3014c6d0309cf9a42ebb
+  SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 689c8e04277f3ad631e60fe2a08e41d411daf8eb
 
-PODFILE CHECKSUM: 644e86173c4b7009f6346b7ab756b21e9f816698
+PODFILE CHECKSUM: 16c90a3cc1f8979d7effde0b1f4c4876e762be23
 
 COCOAPODS: 1.14.0
