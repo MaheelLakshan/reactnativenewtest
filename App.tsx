@@ -1,107 +1,161 @@
 import React, {useState} from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
   View,
+  Text,
+  TextInput,
   TouchableOpacity,
+  StyleSheet,
   Alert,
-  Platform,
+  ScrollView,
+  SafeAreaView,
 } from 'react-native';
-import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
+// @ts-ignore - PayHere doesn't have TypeScript definitions
+import PayHere from '@payhere/payhere-mobilesdk-reactnative';
+
 
 function App(): React.JSX.Element {
-  const [cameraStatus, setCameraStatus] = useState('Not checked');
+  const [amount, setAmount] = useState('50.00');
+  const [firstName, setFirstName] = useState('Saman');
+  const [lastName, setLastName] = useState('Perera');
+  const [email, setEmail] = useState('samanp@gmail.com');
+  const [phone, setPhone] = useState('0771234567');
 
-  const checkCameraPermission = async () => {
-    try {
-      const permission =
-        Platform.OS === 'ios'
-          ? PERMISSIONS.IOS.CAMERA
-          : PERMISSIONS.ANDROID.CAMERA;
+  const initiatePayment = () => {
+    const paymentObject = {
+      sandbox: true,
+      merchant_id: '1211149',
+      notify_url: 'http://sample.com/notify',
+      order_id: 'Order_' + new Date().getTime(),
+      items: 'Test Payment from React Native',
+      amount: amount,
+      currency: 'LKR',
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      phone: phone,
+      address: 'No.1, Galle Road',
+      city: 'Colombo',
+      country: 'Sri Lanka',
+      delivery_address: 'No. 46, Galle road, Kalutara South',
+      delivery_city: 'Kalutara',
+      delivery_country: 'Sri Lanka',
+      custom_1: '',
+      custom_2: '',
+    };
 
-      const result = await check(permission);
-
-      switch (result) {
-        case RESULTS.UNAVAILABLE:
-          setCameraStatus('❌ Camera not available');
-          break;
-        case RESULTS.DENIED:
-          setCameraStatus('⚠️ Permission denied');
-          break;
-        case RESULTS.GRANTED:
-          setCameraStatus('✅ Permission granted');
-          break;
-        case RESULTS.BLOCKED:
-          setCameraStatus('🚫 Permission blocked');
-          break;
-      }
-    } catch (error) {
-      console.error('Permission check error:', error);
-    }
-  };
-
-  const requestCameraPermission = async () => {
-    try {
-      const permission =
-        Platform.OS === 'ios'
-          ? PERMISSIONS.IOS.CAMERA
-          : PERMISSIONS.ANDROID.CAMERA;
-
-      const result = await request(permission);
-
-      if (result === RESULTS.GRANTED) {
-        setCameraStatus('✅ Permission granted!');
-        Alert.alert('Success', 'Camera permission granted!');
-      } else {
-        setCameraStatus('❌ Permission denied');
-        Alert.alert('Denied', 'Camera permission was denied');
-      }
-    } catch (error) {
-      console.error('Permission request error:', error);
-    }
+    PayHere.startPayment(
+      paymentObject,
+      (paymentId) => {
+        console.log('Payment Completed', paymentId);
+        Alert.alert('Success! 🎉', `Payment completed!\nPayment ID: ${paymentId}`);
+      },
+      (errorData) => {
+        console.log('Payment Error', errorData);
+        Alert.alert('Payment Error ❌', errorData);
+      },
+      () => {
+        console.log('Payment Dismissed');
+        Alert.alert('Cancelled', 'Payment was cancelled by user');
+      },
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>🍎 iOS CocoaPods Test</Text>
-        <Text style={styles.subtitle}>
-          Testing Podfile configuration with permissions
-        </Text>
-
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Camera Status:</Text>
-          <Text style={styles.statusText}>{cameraStatus}</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={checkCameraPermission}>
-          <Text style={styles.buttonText}>Check Permission</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.buttonPrimary]}
-          onPress={requestCameraPermission}>
-          <Text style={styles.buttonText}>Request Permission</Text>
-        </TouchableOpacity>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.infoTitle}>✅ What This Tests:</Text>
-          <Text style={styles.infoText}>
-            • CocoaPods installation{'\n'}
-            • Podfile configuration{'\n'}
-            • Native module linking{'\n'}
-            • iOS permissions setup{'\n'}
-            • Info.plist modifications
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>💳 PayHere Payment Test</Text>
+          <Text style={styles.subtitle}>
+            iOS & Android Payment Gateway Integration
           </Text>
         </View>
 
-        <Text style={styles.helpText}>
-          If this works, your iOS environment is properly configured!
-        </Text>
-      </View>
+        <View style={styles.form}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Amount (LKR)</Text>
+            <TextInput
+              style={styles.input}
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="decimal-pad"
+              placeholder="50.00"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>First Name</Text>
+            <TextInput
+              style={styles.input}
+              value={firstName}
+              onChangeText={setFirstName}
+              placeholder="First Name"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Last Name</Text>
+            <TextInput
+              style={styles.input}
+              value={lastName}
+              onChangeText={setLastName}
+              placeholder="Last Name"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              placeholder="email@example.com"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Phone</Text>
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              placeholder="0771234567"
+            />
+          </View>
+
+          <TouchableOpacity style={styles.payButton} onPress={initiatePayment}>
+            <Text style={styles.payButtonText}>💰 Pay LKR {amount}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.testInfoBox}>
+          <Text style={styles.testInfoTitle}>🧪 Test Mode Active</Text>
+          <Text style={styles.testInfoText}>
+            Using PayHere Sandbox Environment
+          </Text>
+          <View style={styles.divider} />
+          <Text style={styles.testCardTitle}>Test Card Details:</Text>
+          <Text style={styles.testCardText}>
+            💳 Visa: 4916217501611292{'\n'}
+            💳 Master: 5307732125531696{'\n'}
+            💳 Amex: 371449635398431{'\n'}
+            📅 Expiry: Any future date{'\n'}
+            🔒 CVV: Any 3 digits
+          </Text>
+        </View>
+
+        <View style={styles.statusBox}>
+          <Text style={styles.statusTitle}>✅ Integration Status</Text>
+          <Text style={styles.statusText}>
+            • PayHere SDK: Installed{'\n'}
+            • Android: Configured{'\n'}
+            • iOS: Configured{'\n'}
+            • Ready to test payments!
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -109,87 +163,126 @@ function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
-  content: {
-    flex: 1,
+  scrollContent: {
     padding: 20,
+    paddingBottom: 40,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 30,
+    marginTop: 10,
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-    marginBottom: 10,
+    color: '#1a1a1a',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
-    marginBottom: 30,
   },
-  statusContainer: {
+  form: {
     backgroundColor: 'white',
+    borderRadius: 16,
     padding: 20,
-    borderRadius: 10,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  statusLabel: {
-    fontSize: 16,
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
     fontWeight: '600',
-    color: '#555',
+    color: '#333',
     marginBottom: 8,
   },
-  statusText: {
-    fontSize: 18,
-    color: '#333',
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: '#666',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  buttonPrimary: {
-    backgroundColor: '#007AFF',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  infoBox: {
-    backgroundColor: '#e3f2fd',
-    padding: 20,
+  input: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
     borderRadius: 10,
-    marginTop: 20,
-    borderWidth: 2,
-    borderColor: '#2196F3',
-  },
-  infoTitle: {
+    padding: 14,
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1976D2',
-    marginBottom: 10,
+    backgroundColor: '#fafafa',
+    color: '#1a1a1a',
   },
-  infoText: {
+  payButton: {
+    backgroundColor: '#00b894',
+    padding: 18,
+    borderRadius: 12,
+    marginTop: 10,
+    alignItems: 'center',
+    shadowColor: '#00b894',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  payButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  testInfoBox: {
+    backgroundColor: '#fff3cd',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#ffc107',
+  },
+  testInfoTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#856404',
+    marginBottom: 4,
+  },
+  testInfoText: {
     fontSize: 14,
-    color: '#1565C0',
+    color: '#856404',
+    marginBottom: 12,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#ffc107',
+    marginVertical: 12,
+  },
+  testCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#856404',
+    marginBottom: 8,
+  },
+  testCardText: {
+    fontSize: 13,
+    color: '#856404',
     lineHeight: 22,
   },
-  helpText: {
+  statusBox: {
+    backgroundColor: '#d4edda',
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#28a745',
+  },
+  statusTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#155724',
+    marginBottom: 10,
+  },
+  statusText: {
     fontSize: 14,
-    color: '#4caf50',
-    textAlign: 'center',
-    marginTop: 20,
-    fontWeight: '600',
+    color: '#155724',
+    lineHeight: 24,
   },
 });
 
