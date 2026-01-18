@@ -1,85 +1,107 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
-  StatusBar,
   StyleSheet,
   Text,
   View,
-  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Platform,
 } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 function App(): React.JSX.Element {
-  const [deviceInfo, setDeviceInfo] = useState({
-    brand: '',
-    model: '',
-    systemVersion: '',
-    appVersion: '',
-    buildNumber: '',
-  });
+  const [cameraStatus, setCameraStatus] = useState('Not checked');
 
-  useEffect(() => {
-    const getDeviceInfo = async () => {
-      try {
-        setDeviceInfo({
-          brand: await DeviceInfo.getBrand(),
-          model: await DeviceInfo.getModel(),
-          systemVersion: await DeviceInfo.getSystemVersion(),
-          appVersion: await DeviceInfo.getVersion(),
-          buildNumber: await DeviceInfo.getBuildNumber(),
-        });
-      } catch (error) {
-        console.error('Error getting device info:', error);
+  const checkCameraPermission = async () => {
+    try {
+      const permission =
+        Platform.OS === 'ios'
+          ? PERMISSIONS.IOS.CAMERA
+          : PERMISSIONS.ANDROID.CAMERA;
+
+      const result = await check(permission);
+
+      switch (result) {
+        case RESULTS.UNAVAILABLE:
+          setCameraStatus('❌ Camera not available');
+          break;
+        case RESULTS.DENIED:
+          setCameraStatus('⚠️ Permission denied');
+          break;
+        case RESULTS.GRANTED:
+          setCameraStatus('✅ Permission granted');
+          break;
+        case RESULTS.BLOCKED:
+          setCameraStatus('🚫 Permission blocked');
+          break;
       }
-    };
+    } catch (error) {
+      console.error('Permission check error:', error);
+    }
+  };
 
-    getDeviceInfo();
-  }, []);
+  const requestCameraPermission = async () => {
+    try {
+      const permission =
+        Platform.OS === 'ios'
+          ? PERMISSIONS.IOS.CAMERA
+          : PERMISSIONS.ANDROID.CAMERA;
+
+      const result = await request(permission);
+
+      if (result === RESULTS.GRANTED) {
+        setCameraStatus('✅ Permission granted!');
+        Alert.alert('Success', 'Camera permission granted!');
+      } else {
+        setCameraStatus('❌ Permission denied');
+        Alert.alert('Denied', 'Camera permission was denied');
+      }
+    } catch (error) {
+      console.error('Permission request error:', error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        <View style={styles.header}>
-          <Text style={styles.title}>🔧 Environment Test</Text>
-          <Text style={styles.subtitle}>
-            If you see device info below, your environment is working!
+      <View style={styles.content}>
+        <Text style={styles.title}>🍎 iOS CocoaPods Test</Text>
+        <Text style={styles.subtitle}>
+          Testing Podfile configuration with permissions
+        </Text>
+
+        <View style={styles.statusContainer}>
+          <Text style={styles.statusLabel}>Camera Status:</Text>
+          <Text style={styles.statusText}>{cameraStatus}</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={checkCameraPermission}>
+          <Text style={styles.buttonText}>Check Permission</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.buttonPrimary]}
+          onPress={requestCameraPermission}>
+          <Text style={styles.buttonText}>Request Permission</Text>
+        </TouchableOpacity>
+
+        <View style={styles.infoBox}>
+          <Text style={styles.infoTitle}>✅ What This Tests:</Text>
+          <Text style={styles.infoText}>
+            • CocoaPods installation{'\n'}
+            • Podfile configuration{'\n'}
+            • Native module linking{'\n'}
+            • iOS permissions setup{'\n'}
+            • Info.plist modifications
           </Text>
         </View>
 
-        <View style={styles.infoContainer}>
-          <View style={styles.row}>
-            <Text style={styles.label}>Brand:</Text>
-            <Text style={styles.value}>{deviceInfo.brand || 'Loading...'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Model:</Text>
-            <Text style={styles.value}>{deviceInfo.model || 'Loading...'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>OS Version:</Text>
-            <Text style={styles.value}>{deviceInfo.systemVersion || 'Loading...'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>App Version:</Text>
-            <Text style={styles.value}>{deviceInfo.appVersion || 'Loading...'}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>Build Number:</Text>
-            <Text style={styles.value}>{deviceInfo.buildNumber || 'Loading...'}</Text>
-          </View>
-        </View>
-
-        <View style={styles.resultContainer}>
-          <Text style={styles.resultText}>
-            ✅ Native modules are working correctly!
-          </Text>
-          <Text style={styles.helpText}>
-            If you see this, the issue is likely with PayHere library, not your
-            environment.
-          </Text>
-        </View>
-      </ScrollView>
+        <Text style={styles.helpText}>
+          If this works, your iOS environment is properly configured!
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -89,28 +111,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  scrollView: {
+  content: {
+    flex: 1,
     padding: 20,
-  },
-  header: {
-    marginBottom: 30,
-    alignItems: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
+    textAlign: 'center',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
+    marginBottom: 30,
   },
-  infoContainer: {
+  statusContainer: {
     backgroundColor: 'white',
-    borderRadius: 10,
     padding: 20,
+    borderRadius: 10,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -118,39 +139,57 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  row: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  label: {
+  statusLabel: {
     fontSize: 16,
     fontWeight: '600',
     color: '#555',
-    width: 120,
+    marginBottom: 8,
   },
-  value: {
-    fontSize: 16,
-    color: '#333',
-    flex: 1,
-  },
-  resultContainer: {
-    backgroundColor: '#e8f5e9',
-    borderRadius: 10,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#4caf50',
-  },
-  resultText: {
+  statusText: {
     fontSize: 18,
+    color: '#333',
     fontWeight: 'bold',
-    color: '#2e7d32',
+  },
+  button: {
+    backgroundColor: '#666',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  buttonPrimary: {
+    backgroundColor: '#007AFF',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  infoBox: {
+    backgroundColor: '#e3f2fd',
+    padding: 20,
+    borderRadius: 10,
+    marginTop: 20,
+    borderWidth: 2,
+    borderColor: '#2196F3',
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1976D2',
     marginBottom: 10,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#1565C0',
+    lineHeight: 22,
   },
   helpText: {
     fontSize: 14,
-    color: '#558b2f',
+    color: '#4caf50',
+    textAlign: 'center',
+    marginTop: 20,
+    fontWeight: '600',
   },
 });
 
