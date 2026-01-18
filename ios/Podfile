@@ -1,6 +1,4 @@
-# Transform the original require into a generic node_require function
 def node_require(script)
-  # Resolve script with node to allow for hoisting
   require Pod::Executable.execute_command('node', ['-p',
     "require.resolve(
       '#{script}',
@@ -8,22 +6,19 @@ def node_require(script)
     )", __dir__]).strip
 end
 
-# Use it to require both react-native's and this package's scripts:
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, min_ios_version_supported
+platform :ios, '15.1'
 prepare_react_native_project!
+
+# REMOVED use_modular_headers! - this breaks React Native
 
 setup_permissions([
   'Camera',
 ])
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+install! 'cocoapods', :disable_input_output_paths => true
 
 target 'AwesomeProjectttt' do
   config = use_native_modules!
@@ -33,11 +28,26 @@ target 'AwesomeProjectttt' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # Enable modular headers ONLY for these specific pods
+  pod 'payhere-mobilesdk-reactnative', :path => '../node_modules/@payhere/payhere-mobilesdk-reactnative'
+  pod 'SDWebImage', :modular_headers => true
+  
   post_install do |installer|
     react_native_post_install(
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
     )
+    
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
+        
+        # Enable modular headers only for PayHere SDK
+        if target.name == 'payHereSDK'
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+        end
+      end
+    end
   end
 end
